@@ -76,15 +76,20 @@ average_treatment_effect(cf0, target.sample="treated")
 ##################################################################
 
 # Note: This may take some time to run. 
-# attach(data0)
-# colnames(data0)
-# bcf_fit <- bcf(y = Y1, z = trt, x_control = matrix(c(x1=x1, x2=x2, x3=x3), ncol = 3), 
-#                x_moderate = matrix(c(x1=x1, x2=x2, x3=x3), ncol = 3),
-#                pihat = ps.estimate, nburn = 1000, nsim = 5, nthin = 5)
-# 
-# detach(data1)
-# 
-# tau_post = bcf_fit$tau
+attach(data0)
+colnames(data0)
+bcf_fit <- bcf(y = Y1, z = trt, x_control = matrix(c(x1=x1, x2=x2, x3=x3), ncol = 3),
+               x_moderate = matrix(c(x1=x1, x2=x2, x3=x3), ncol = 3),
+               pihat = ps.estimate, nburn = 2000, nsim = 1000, nthin = 5)
+
+detach(data0)
+
+# ?summary.bcf
+summary(bcf_fit)
+
+tau_post = bcf_fit$tau
+hist(tau_post)
 # sd_post = bcf_fit$sigma
 # tauhat = colMeans(tau_post)
 # sdhat = mean(sd_post)
+
