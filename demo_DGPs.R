@@ -49,3 +49,44 @@ tau.p3 <- dat3 %>% ggplot(aes(ps.true, tau.true, color=Z)) + geom_point() + xlab
 
 ggarrange(tau.p1, tau.p2, tau.p3, nrow=3, common.legend = TRUE, legend="bottom") 
 
+
+
+#################################################################
+##         Generate data from Zhu et al (2023) process         ##
+#################################################################
+# Reproducibility
+set.seed(2000)
+# Perfect Overlap (not in paper, but corresponds to setting where trt, ctrl have same distributions)
+data0 <- gen_dat_Zhu(mu1 = 0, mu2 = 2, P=0.4)
+# some nonoverlap
+data1 <- gen_dat_Zhu(mu1 = 1, mu2 = 2, P=0.5)
+# substantial nonoverlap
+data2 <- gen_dat_Zhu(mu1 = 1, mu2 = 3, P=0.6)
+
+#' Plot the overlap for Vars
+#' The estimated propensity scores are obtained using "plotBart" package. 
+#' They use BART to estimate the propensity scores.
+#' Sourced from line 6.
+g0 <- plot_overlap_pScores(.data = data0, treatment = "trt", response = "Y1", 
+                           confounders = c("x1", "x2", "x3"))  + ggtitle("Good overlap") +labs(subtitle = "mu1 = 0, mu2 = 2, P=0.4")
+v0 <- plot_overlap_vars(.data = data0, treatment = "trt", 
+                        confounders = c("x1", "x2", "x3"))  + ggtitle("Good overlap") +labs(subtitle = "mu1 = 0, mu2 = 2, P=0.4")
+
+g1 <- plot_overlap_pScores(.data = data1, treatment = "trt", response = "Y1", 
+                           confounders = c("x1", "x2", "x3"))  + ggtitle("Some nonoverlap") +labs(subtitle = "mu1 = 1, mu2 = 2, P=0.5")
+v1 <-plot_overlap_vars(.data = data1, treatment = "trt",  
+                       confounders = c("x1", "x2", "x3"))  + ggtitle("Some nonoverlap")+labs(subtitle = "mu1 = 1, mu2 = 2, P=0.5")
+
+g2 <- plot_overlap_pScores(.data = data2, treatment = "trt", response = "Y1", 
+                           confounders = c("x1", "x2", "x3")) + ggtitle("Substantial nonoverlap") +labs(subtitle = "mu1 = 1, mu2 = 3, P=0.6")
+v2 <-plot_overlap_vars(.data = data2, treatment = "trt",  
+                       confounders = c("x1", "x2", "x3")) + ggtitle("Substantial nonoverlap") +labs(subtitle = "mu1 = 1, mu2 = 3, P=0.6")
+
+# overlap in PS, vars by treatment status, with increasing degrees of nonoverlap. 
+grid.arrange(g0,g1,g2, nrow=3)
+grid.arrange(v0,v1,v2, nrow=3)
+
+
+
+
+
