@@ -19,10 +19,9 @@ library(grid)
 library(ggpubr)
 
 # Some packs for the causal inference methods
-library(bartCause)
+
 library(plotBart)
-library(CausalGAM)
-library(grf)
+
 
 ##################################################################
 ##        Three covariates, Y1 := Linear response surface       ##
