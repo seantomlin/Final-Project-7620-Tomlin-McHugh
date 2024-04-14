@@ -49,30 +49,82 @@ tau.p3 <- dat3 %>% ggplot(aes(ps.true, tau.true, color=Z)) + geom_point() + xlab
 
 ggarrange(tau.p1, tau.p2, tau.p3, nrow=3, common.legend = TRUE, legend="bottom") 
 
+sdy <- sd(dat1[["Y"]])
 
-burn_in <- 1000
+burn_in <- 500
 sims <- 1000
-bcf_1 <- bcf(y                = dat1[["Y"]],
-               z                = dat1[["Z"]],
+chains <- 1
+bcf_3 <- bcf(y                = dat1[["Y"]],
+               z                = dat1[["trt"]],
                x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
-               x_moderate       = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+               x_moderate       = as.matrix(data.frame(dat1)[,c("x2")]),
                pihat            = dat1[["ps.true"]],
                nburn            = burn_in,
                nsim             = sims,
-               n_chains         = 2,
+               n_chains         = chains,
                random_seed      = 1,
                update_interval  = 1, 
-               no_output        = TRUE)
+               no_output        = TRUE,
+               ntree_control = 200,
+               ntree_moderate = 100,
+               sigq = 0.75,
+               use_tauscale = F,
+               use_muscale = F,
+               sd_control = 3*sdy,
+               sd_moderate = 3*sdy,
+               power_moderate = 1,
+               base_moderate = 0.95,
+               power_control = 1,
+               base_control = 0.95,
+               include_pi = "both")
+
+plot(1:(sims), bcf_3$tau[1:sims,2], type="l")
+plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),2], type="l")
+
+hist(bcf_3$tau[1:sims,1])
+hist(bcf_3$yhat[1:sims,1])
+
 
 true_ate <- mean(dat1$tau.true)
 
-tau_ests <- data.frame(Mean  = colMeans(bcf_1$tau),
-                       Low95 = apply(bcf_1$tau, 2, function(x) quantile(x, 0.025)),
-                       Up95  = apply(bcf_1$tau, 2, function(x) quantile(x, 0.975)))
+tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau),
+                       Low95 = apply(bcf_3$tau, 2, function(x) quantile(x, 0.025)),
+                       Up95  = apply(bcf_3$tau, 2, function(x) quantile(x, 0.975)))
 
 ggplot(NULL, aes(x = dat1$x2)) +
   geom_pointrange(aes(y = tau_ests$Mean, ymin = tau_ests$Low95, ymax = tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
   geom_smooth(aes(y = dat1$tau.true), se = FALSE) +
+  xlab("x2") +
+  ylab("Estimated TE") +
+  xlim(-2, 6) +
+  geom_segment(aes(x = 3, xend = 4, y = 0.2, yend = 0.2), color = "blue", alpha = 0.9) +
+  geom_text(aes(x = 4.5, y = 0.2, label = "Truth"), color = "black") +
+  geom_segment(aes(x = 3, xend = 4, y = 0.1, yend = 0.1), color = "forestgreen", alpha = 0.7) +
+  geom_text(aes(x = 5.2, y = 0.1, label = "Estimate (95% CI)"), color = "black")
+
+
+x11_tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau[,which(dat1$x1 == 1)]),
+                       Low95 = apply(bcf_3$tau[,which(dat1$x1 == 1)], 2, function(x) quantile(x, 0.025)),
+                       Up95  = apply(bcf_3$tau[,which(dat1$x1 == 1)], 2, function(x) quantile(x, 0.975)))
+
+ggplot(NULL, aes(x = dat1[which(dat1$x1 == 1),]$x2)) +
+  geom_pointrange(aes(y = x11_tau_ests$Mean, ymin = x11_tau_ests$Low95, ymax = x11_tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
+  geom_smooth(aes(y = dat1[which(dat1$x1 == 1),]$tau.true), se = FALSE) +
+  xlab("x2") +
+  ylab("Estimated TE") +
+  xlim(-2, 6) +
+  geom_segment(aes(x = 3, xend = 4, y = 0.2, yend = 0.2), color = "blue", alpha = 0.9) +
+  geom_text(aes(x = 4.5, y = 0.2, label = "Truth"), color = "black") +
+  geom_segment(aes(x = 3, xend = 4, y = 0.1, yend = 0.1), color = "forestgreen", alpha = 0.7) +
+  geom_text(aes(x = 5.2, y = 0.1, label = "Estimate (95% CI)"), color = "black")
+
+z1_tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau[,which(dat1$trt == 1)]),
+                           Low95 = apply(bcf_3$tau[,which(dat1$trt == 1)], 2, function(x) quantile(x, 0.025)),
+                           Up95  = apply(bcf_3$tau[,which(dat1$trt == 1)], 2, function(x) quantile(x, 0.975)))
+
+ggplot(NULL, aes(x = dat1[which(dat1$trt == 1),]$x2)) +
+  geom_pointrange(aes(y = z1_tau_ests$Mean, ymin = z1_tau_ests$Low95, ymax = z1_tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
+  geom_smooth(aes(y = dat1[which(dat1$trt == 1),]$tau.true), se = FALSE) +
   xlab("x2") +
   ylab("Estimated TE") +
   xlim(-2, 6) +
