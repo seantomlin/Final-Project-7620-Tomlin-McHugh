@@ -29,3 +29,35 @@ sigma <- diff(range(mu + tau*pi))/8
 
 # draw the response variable with additive error
 y <- y_noiseless + sigma*rnorm(n)/sqrt(weights)
+
+
+bcf_out <- bcf(y                = y,
+               z                = z,
+               x_control        = x,
+               x_moderate       = x,
+               pihat            = pi,
+               nburn            = n_burn,
+               nsim             = n_sim,
+               w                = weights,
+               n_chains         = 4,
+               random_seed      = 1,
+               update_interval  = 1, 
+               no_output        = TRUE)
+
+summary(bcf_out)
+
+
+tau_ests <- data.frame(Mean  = colMeans(bcf_out$tau),
+                       Low95 = apply(bcf_out$tau, 2, function(x) quantile(x, 0.025)),
+                       Up95  = apply(bcf_out$tau, 2, function(x) quantile(x, 0.975)))
+
+ggplot(NULL, aes(x = x[,3])) +
+  geom_pointrange(aes(y = tau_ests$Mean, ymin = tau_ests$Low95, ymax = tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
+  geom_smooth(aes(y = tau), se = FALSE) +
+  xlab("x3") +
+  ylab("tau_hat") +
+  xlim(-4, 6) +
+  geom_segment(aes(x = 3, xend = 4, y = 0.2, yend = 0.2), color = "blue", alpha = 0.9) +
+  geom_text(aes(x = 4.5, y = 0.2, label = "Truth"), color = "black") +
+  geom_segment(aes(x = 3, xend = 4, y = 0.1, yend = 0.1), color = "forestgreen", alpha = 0.7) +
+  geom_text(aes(x = 5.2, y = 0.1, label = "Estimate (95% CI)"), color = "black")

@@ -12,6 +12,7 @@
 # Reproducibility
 set.seed(1000) 
 
+
 # Overlap settings
 c1 <- 0 # good overlap
 c2 <- 0.35 # some nonoverlap
@@ -48,6 +49,37 @@ tau.p3 <- dat3 %>% ggplot(aes(ps.true, tau.true, color=Z)) + geom_point() + xlab
 
 ggarrange(tau.p1, tau.p2, tau.p3, nrow=3, common.legend = TRUE, legend="bottom") 
 
+
+burn_in <- 1000
+sims <- 1000
+bcf_1 <- bcf(y                = dat1[["Y"]],
+               z                = dat1[["Z"]],
+               x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+               x_moderate       = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+               pihat            = dat1[["ps.true"]],
+               nburn            = burn_in,
+               nsim             = sims,
+               n_chains         = 2,
+               random_seed      = 1,
+               update_interval  = 1, 
+               no_output        = TRUE)
+
+true_ate <- mean(dat1$tau.true)
+
+tau_ests <- data.frame(Mean  = colMeans(bcf_1$tau),
+                       Low95 = apply(bcf_1$tau, 2, function(x) quantile(x, 0.025)),
+                       Up95  = apply(bcf_1$tau, 2, function(x) quantile(x, 0.975)))
+
+ggplot(NULL, aes(x = dat1$x2)) +
+  geom_pointrange(aes(y = tau_ests$Mean, ymin = tau_ests$Low95, ymax = tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
+  geom_smooth(aes(y = dat1$tau.true), se = FALSE) +
+  xlab("x2") +
+  ylab("Estimated TE") +
+  xlim(-2, 6) +
+  geom_segment(aes(x = 3, xend = 4, y = 0.2, yend = 0.2), color = "blue", alpha = 0.9) +
+  geom_text(aes(x = 4.5, y = 0.2, label = "Truth"), color = "black") +
+  geom_segment(aes(x = 3, xend = 4, y = 0.1, yend = 0.1), color = "forestgreen", alpha = 0.7) +
+  geom_text(aes(x = 5.2, y = 0.1, label = "Estimate (95% CI)"), color = "black")
 
 
 #################################################################
