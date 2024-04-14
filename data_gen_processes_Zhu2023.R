@@ -23,6 +23,7 @@ library(bartCause)
 library(plotBart)
 library(CausalGAM)
 library(grf)
+library(bcf)
 
 ##################################################################
 ##        Three covariates, Y1 := Linear response surface       ##
