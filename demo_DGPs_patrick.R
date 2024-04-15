@@ -49,15 +49,18 @@ tau.p3 <- dat3 %>% ggplot(aes(ps.true, tau.true, color=Z)) + geom_point() + xlab
 
 ggarrange(tau.p1, tau.p2, tau.p3, nrow=3, common.legend = TRUE, legend="bottom") 
 
+tau.x2.p1 <- dat1 %>% ggplot(aes(x2, tau.true, color=Z)) + geom_point() + xlab("x2") +
+  ggtitle("c=0") + ylab("Individual causal effect") + geom_rug(sides="b")
+
 sdy <- sd(dat1[["Y"]])
 
-burn_in <- 500
+burn_in <- 2000
 sims <- 1000
-chains <- 1
+chains <- 2
 bcf_3 <- bcf(y                = dat1[["Y"]],
                z                = dat1[["trt"]],
                x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
-               x_moderate       = as.matrix(data.frame(dat1)[,c("x2")]),
+               x_moderate       = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
                pihat            = dat1[["ps.true"]],
                nburn            = burn_in,
                nsim             = sims,
@@ -76,9 +79,10 @@ bcf_3 <- bcf(y                = dat1[["Y"]],
                base_moderate = 0.95,
                power_control = 1,
                base_control = 0.95,
-               include_pi = "both")
+               include_pi = "control")
 
 plot(1:(sims), bcf_3$tau[1:sims,2], type="l")
+plot(1:(sims), bcf_3$tau[1:sims,497], type="l")
 plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),2], type="l")
 
 hist(bcf_3$tau[1:sims,1])
@@ -93,7 +97,7 @@ tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau),
 
 ggplot(NULL, aes(x = dat1$x2)) +
   geom_pointrange(aes(y = tau_ests$Mean, ymin = tau_ests$Low95, ymax = tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
-  geom_smooth(aes(y = dat1$tau.true), se = FALSE) +
+  geom_point(aes(y = dat1$tau.true), se = FALSE) +
   xlab("x2") +
   ylab("Estimated TE") +
   xlim(-2, 6) +
@@ -109,7 +113,7 @@ x11_tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau[,which(dat1$x1 == 1)]),
 
 ggplot(NULL, aes(x = dat1[which(dat1$x1 == 1),]$x2)) +
   geom_pointrange(aes(y = x11_tau_ests$Mean, ymin = x11_tau_ests$Low95, ymax = x11_tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
-  geom_smooth(aes(y = dat1[which(dat1$x1 == 1),]$tau.true), se = FALSE) +
+  geom_point(aes(y = dat1[which(dat1$x1 == 1),]$tau.true), se = FALSE) +
   xlab("x2") +
   ylab("Estimated TE") +
   xlim(-2, 6) +
@@ -170,6 +174,33 @@ grid.arrange(g0,g1,g2, nrow=3)
 grid.arrange(v0,v1,v2, nrow=3)
 
 
+
+
+
+
+bcf_good <- bcf(y                = dat1[["Y"]],
+                z                = dat1[["trt"]],
+                x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+                x_moderate       = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+                pihat            = dat1[["ps.true"]],
+                nburn            = burn_in,
+                nsim             = sims,
+                n_chains         = chains,
+                random_seed      = 1,
+                update_interval  = 1, 
+                no_output        = TRUE,
+                ntree_control = 200,
+                ntree_moderate = 100,
+                sigq = 0.75,
+                use_tauscale = F,
+                use_muscale = F,
+                sd_control = 3*sdy,
+                sd_moderate = 3*sdy,
+                power_moderate = 1,
+                base_moderate = 0.95,
+                power_control = 1,
+                base_control = 0.95,
+                include_pi = "control")
 
 
 
