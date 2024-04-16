@@ -92,5 +92,26 @@ gen_dat_Nethery <- function(c, N=500, prob.Z=0.5){
   dat
 }
 
+gen_dat_Nethery_witherror <- function(c, N=500, prob.Z=0.5){
+  # apply this rowwise to x1, x2, prob.x1  
+  true_ps <- function(x1, x2){
+    A <- dnorm(x2, mean=2+c, sd=1.25+0.1*c)*dbinom(x1, 1, prob = 0.5)
+    B <- dnorm(x2, mean=2+c, sd=1.25+0.1*c)*dbinom(x1, 1, prob = 0.5) + 
+      dnorm(x2, mean=1, sd=1)*dbinom(x1, 1, prob = 0.4)
+    A/B
+  }
+  # Treatment, covariates, potential outcomes
+  dat <-  expand.grid(id = 1:N) %>% mutate(trt = rbinom(N, 1, prob.Z)) %>% 
+    group_by(id, trt) %>% 
+    mutate(prob.X1 =if_else(trt==1, 0.5, 0.4)) %>% 
+    mutate(x1 = rbinom(n=1, size=1, prob = prob.X1)) %>% 
+    mutate(x2 = if_else(trt==1, rnorm(1, mean=2+c, sd=1.25+0.1*c), rnorm(1, mean=1, sd=1))) %>% # change with trueps 
+    mutate(ps.true = true_ps(x1, x2)) %>% 
+    mutate(Y.0 = -1.5*x2 + rnorm(1, 0, 0.1), Y.1 = (-3/(1+exp(-10*(x2-1))) + 0.25*x1 - x1*x2) + rnorm(1, 0, 0.1)) %>% 
+    mutate(Y = if_else(trt==1, Y.1, Y.0)) %>% 
+    mutate(tau.true = Y.1- Y.0)  %>% 
+    mutate(Z=factor(trt))
+  dat
+}
 
 
