@@ -54,39 +54,39 @@ tau.x2.p1 <- dat1 %>% ggplot(aes(x2, tau.true, color=Z)) + geom_point() + xlab("
 
 sdy <- sd(dat1[["Y"]])
 
-burn_in <- 2000
-sims <- 1000
+burn_in <- 5000
+sims <- 20000
 chains <- 2
 bcf_3 <- bcf(y                = dat1[["Y"]],
-               z                = dat1[["trt"]],
-               x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
-               x_moderate       = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
-               pihat            = dat1[["ps.true"]],
-               nburn            = burn_in,
-               nsim             = sims,
-               n_chains         = chains,
-               random_seed      = 1,
-               update_interval  = 1, 
-               no_output        = TRUE,
-               ntree_control = 200,
-               ntree_moderate = 100,
-               sigq = 0.75,
-               use_tauscale = F,
-               use_muscale = F,
-               sd_control = 3*sdy,
-               sd_moderate = 3*sdy,
-               power_moderate = 1,
-               base_moderate = 0.95,
-               power_control = 1,
-               base_control = 0.95,
-               include_pi = "control")
+             z                = dat1[["trt"]],
+             x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+             x_moderate       = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
+             pihat            = dat1[["ps.true"]],
+             nburn            = burn_in,
+             nsim             = sims,
+             n_chains         = chains,
+             random_seed      = 1,
+             update_interval  = 1, 
+             no_output        = TRUE,
+             ntree_control = 200,
+             ntree_moderate = 100,
+             sigq = 0.75,
+             use_tauscale = F,
+             use_muscale = F,
+             sd_control = 3*sdy,
+             sd_moderate = 3*sdy,
+             power_moderate = 1,
+             base_moderate = 0.95,
+             power_control = 1,
+             base_control = 0.95,
+             include_pi = "control")
 
 plot(1:(sims), bcf_3$tau[1:sims,2], type="l")
 plot(1:(sims), bcf_3$tau[1:sims,497], type="l")
-plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),2], type="l")
+#plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),2], type="l")
 
-hist(bcf_3$tau[1:sims,1])
-hist(bcf_3$yhat[1:sims,1])
+#hist(bcf_3$tau[1:sims,1])
+#hist(bcf_3$yhat[1:sims,1])
 
 
 true_ate <- mean(dat1$tau.true)
@@ -108,8 +108,8 @@ ggplot(NULL, aes(x = dat1$x2)) +
 
 
 x11_tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau[,which(dat1$x1 == 1)]),
-                       Low95 = apply(bcf_3$tau[,which(dat1$x1 == 1)], 2, function(x) quantile(x, 0.025)),
-                       Up95  = apply(bcf_3$tau[,which(dat1$x1 == 1)], 2, function(x) quantile(x, 0.975)))
+                           Low95 = apply(bcf_3$tau[,which(dat1$x1 == 1)], 2, function(x) quantile(x, 0.025)),
+                           Up95  = apply(bcf_3$tau[,which(dat1$x1 == 1)], 2, function(x) quantile(x, 0.975)))
 
 ggplot(NULL, aes(x = dat1[which(dat1$x1 == 1),]$x2)) +
   geom_pointrange(aes(y = x11_tau_ests$Mean, ymin = x11_tau_ests$Low95, ymax = x11_tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
@@ -123,8 +123,8 @@ ggplot(NULL, aes(x = dat1[which(dat1$x1 == 1),]$x2)) +
   geom_text(aes(x = 5.2, y = 0.1, label = "Estimate (95% CI)"), color = "black")
 
 z1_tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau[,which(dat1$trt == 1)]),
-                           Low95 = apply(bcf_3$tau[,which(dat1$trt == 1)], 2, function(x) quantile(x, 0.025)),
-                           Up95  = apply(bcf_3$tau[,which(dat1$trt == 1)], 2, function(x) quantile(x, 0.975)))
+                          Low95 = apply(bcf_3$tau[,which(dat1$trt == 1)], 2, function(x) quantile(x, 0.025)),
+                          Up95  = apply(bcf_3$tau[,which(dat1$trt == 1)], 2, function(x) quantile(x, 0.975)))
 
 ggplot(NULL, aes(x = dat1[which(dat1$trt == 1),]$x2)) +
   geom_pointrange(aes(y = z1_tau_ests$Mean, ymin = z1_tau_ests$Low95, ymax = z1_tau_ests$Up95), color = "forestgreen", alpha = 0.5) +
@@ -174,10 +174,128 @@ grid.arrange(g0,g1,g2, nrow=3)
 grid.arrange(v0,v1,v2, nrow=3)
 
 
+sd2 <- sd(dat2[["Y"]])
+
+burn_in <- 1000
+sims <- 2000
+chains <- 2
+bcf_dat2 <- bcf(y                = dat2[["Y"]],
+                z                = dat2[["trt"]],
+                x_control        = as.matrix(data.frame(dat2)[,c("x1", "x2")]),
+                x_moderate       = as.matrix(data.frame(dat2)[,c("x1", "x2")]),
+                pihat            = dat2[["ps.true"]],
+                nburn            = burn_in,
+                nsim             = sims,
+                n_chains         = chains,
+                random_seed      = 1,
+                update_interval  = 1, 
+                no_output        = TRUE,
+                ntree_control = 200,
+                ntree_moderate = 100,
+                sigq = 0.75,
+                use_tauscale = F,
+                use_muscale = F,
+                sd_control = 3*sd2,
+                sd_moderate = 3*sd2,
+                power_moderate = 1,
+                base_moderate = 0.95,
+                power_control = 1,
+                base_control = 0.95,
+                include_pi = "control")
+
+plot(1:(sims), bcf_dat2$tau[1:sims,2], type="l")
+plot(1:(sims), bcf_dat2$tau[1:sims,497], type="l")
+#plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),2], type="l")
+
+#hist(bcf_3$tau[1:sims,1])
+#hist(bcf_3$yhat[1:sims,1])
+
+
+
+tau_ests2 <- data.frame(Mean  = colMeans(bcf_dat2$tau),
+                        Low95 = apply(bcf_dat2$tau, 2, function(x) quantile(x, 0.025)),
+                        Up95  = apply(bcf_dat2$tau, 2, function(x) quantile(x, 0.975)))
+
+ggplot(NULL, aes(x = dat2$x2)) +
+  geom_pointrange(aes(y = tau_ests2$Mean, ymin = tau_ests2$Low95, ymax = tau_ests2$Up95), color = "forestgreen", alpha = 0.5) +
+  geom_point(aes(y = dat2$tau.true), se = FALSE) +
+  xlab("x2") +
+  ylab("Estimated TE") +
+  xlim(-2, 6) +
+  geom_segment(aes(x = 3, xend = 4, y = 0.2, yend = 0.2), color = "blue", alpha = 0.9) +
+  geom_text(aes(x = 4.5, y = 0.2, label = "Truth"), color = "black") +
+  geom_segment(aes(x = 3, xend = 4, y = 0.1, yend = 0.1), color = "forestgreen", alpha = 0.7) +
+  geom_text(aes(x = 5.2, y = 0.1, label = "Estimate (95% CI)"), color = "black")
 
 
 
 
+sd3 <- sd(dat3[["Y"]])
+
+burn_in <- 0
+sims <- 10000
+chains <- 3
+bcf_dat3 <- bcf(y                = dat3[["Y"]],
+                z                = dat3[["trt"]],
+                x_control        = as.matrix(data.frame(dat3)[,c("x1", "x2")]),
+                x_moderate       = as.matrix(data.frame(dat3)[,c("x1", "x2")]),
+                pihat            = dat3[["ps.true"]],
+                nburn            = burn_in,
+                nsim             = sims,
+                n_chains         = chains,
+                random_seed      = 1,
+                update_interval  = 1, 
+                no_output        = TRUE,
+                ntree_control = 200,
+                ntree_moderate = 100,
+                sigq = 0.8,
+                use_tauscale = F,
+                use_muscale = F,
+                sd_control = 3*sd3,
+                sd_moderate = 3*sd3,
+                power_moderate = 1,
+                base_moderate = 0.95,
+                power_control = 1,
+                base_control = 0.95,
+                include_pi = "control")
+
+plot(1:(sims), bcf_dat3$tau[1:sims,2], type="l")
+plot(1:(sims), bcf_dat3$tau[1:sims,380], type="l")
+plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),380], type="l")
+
+#hist(bcf_3$tau[1:sims,1])
+#hist(bcf_3$yhat[1:sims,1])
+
+
+
+tau_ests3 <- data.frame(Mean  = colMeans(bcf_dat3$tau[c(5000:10000, 15000:20000, 25000:30000),]),
+                        Low95 = apply(bcf_dat3$tau[c(5000:10000, 15000:20000, 25000:30000),], 2, function(x) quantile(x, 0.025)),
+                        Up95  = apply(bcf_dat3$tau[c(5000:10000, 15000:20000, 25000:30000),], 2, function(x) quantile(x, 0.975)))
+
+ggplot(NULL, aes(x = dat3$x2, color = as.factor(dat3$trt))) +
+  geom_pointrange(aes(y = tau_ests3$Mean, ymin = tau_ests3$Low95, ymax = tau_ests3$Up95), color = "black", alpha = 0.3) +
+  geom_point(aes(y = dat3$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation (c = 0.7)", subtitle="Black: BCF Estimate/95% CI", col="z")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+burn_in <- 1000
+sims <- 2000
+chains <- 1
 bcf_good <- bcf(y                = dat1[["Y"]],
                 z                = dat1[["trt"]],
                 x_control        = as.matrix(data.frame(dat1)[,c("x1", "x2")]),
@@ -190,7 +308,7 @@ bcf_good <- bcf(y                = dat1[["Y"]],
                 update_interval  = 1, 
                 no_output        = TRUE,
                 ntree_control = 200,
-                ntree_moderate = 100,
+                ntree_moderate = 150,
                 sigq = 0.75,
                 use_tauscale = F,
                 use_muscale = F,
@@ -202,5 +320,15 @@ bcf_good <- bcf(y                = dat1[["Y"]],
                 base_control = 0.95,
                 include_pi = "control")
 
+tau_ests <- data.frame(Mean  = colMeans(bcf_good$tau),
+                       Low95 = apply(bcf_good$tau, 2, function(x) quantile(x, 0.025)),
+                       Up95  = apply(bcf_good$tau, 2, function(x) quantile(x, 0.975)))
 
+ggplot(NULL, aes(x = dat1$x2, color = as.factor(dat1$trt))) +
+  geom_pointrange(aes(y = tau_ests$Mean, ymin = tau_ests$Low95, ymax = tau_ests$Up95), color = "black", alpha = 0.3) +
+  geom_point(aes(y = dat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation (c = 0)", subtitle="Black: BCF Estimate/95% CI", col="z")
 
