@@ -27,7 +27,7 @@ data0 <- data0 %>% group_by(id) %>%  bind_cols(ps.estimate=fitted(ps.bart0))
 ##################################################################
 ##                         vanilla BART                         ##
 ##################################################################
-bart.mod <- bart.ps.mod <- bartc(data = data0, response = Y1, treatment = trt,
+bart.mod <- bartc(data = data0, response = Y1, treatment = trt,
                                  confounders = x1 + x2 + x3, estimand = "ate",
                                  p.scoreAsCovariate = F)
 # Some recommended diagnostics
@@ -66,7 +66,7 @@ confint(fit0)["trt",]
 # https://grf-labs.github.io/grf/articles/grf_guide.html#efficiently-estimating-summaries-of-the-cates-1
 
 cf0 <- causal_forest(X=as.matrix(data0[, c("x1", "x2", "x3")]), Y=data0$Y1, W=data0$trt)
-average_treatment_effect(cf0, target.sample="treated")
+average_treatment_effect(cf0, target.sample="all")
 
 
 

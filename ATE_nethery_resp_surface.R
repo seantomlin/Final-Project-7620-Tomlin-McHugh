@@ -50,7 +50,7 @@ str(bcf_fit$yhat)
 
 
 # Make predicted values plot by propensity score. 
-#load("C:/Users/User/OneDrive - The Ohio State University/Spring 2024/STAT 7620/Final Project/Final-Project-7620-Tomlin-Mchugh/bcf_nethery_fit_onehour.RData")
+load("C:/Users/User/OneDrive - The Ohio State University/Spring 2024/STAT 7620/Final Project/Final-Project-7620-Tomlin-Mchugh/bcf_nethery_fit_onehour.RData")
 
 tauhat.i <-apply(bcf_fit$tau, 2,mean) 
 tauhat.lower <-apply(bcf_fit$tau, 2,quantile, probs=c(0.025))  # lower quantile
@@ -80,6 +80,25 @@ TE.plot2 <- dat1 %>%  ggplot(aes(x2, tau.hat)) + geom_point(col="red") +
 
 
 grid.arrange(TE.plot1, TE.plot2)
+
+# TE.band1 <- dat1 %>%  ggplot(aes(ps.true, tau.hat)) + geom_point(col="red") +
+#   geom_line(aes(y=tau.true, group=id), color="black") +
+#   geom_errorbar(aes(ymin=tauhat.lower, ymax=tauhat.upper), color="red") +
+#   geom_rug(aes(ps.true, color=Z), sides="b", linewidth=2, alpha=0.5) +
+#   ylab("Treatment effect") + xlab("True propensity score") +
+#   ggtitle("True and estimated individual treatment effects by True PS")
+# 
+# 
+# TE.band2 <- dat1 %>%  ggplot(aes(x2, tau.hat)) + geom_point(col="red") +
+#   geom_point(aes(y=tau.true), color="black") +
+#   geom_errorbar(aes(ymin=tauhat.lower, ymax=tauhat.upper), color="red") +
+#   geom_rug(aes(x2, color=Z), sides="b", linewidth=2, alpha=0.5) +
+#   ylab("Treatment effect") + xlab("X2") +
+#   ggtitle("True and estimated individual treatment effects by X2")
+
+
+
+
 
 
 #dat1 %>% ggplot(aes(x2, fill=Z)) + geom_histogram(alpha=3)
