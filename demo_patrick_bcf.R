@@ -28,14 +28,14 @@ p1 <- dat1 %>% ggplot(aes(ps.true, fill=Z, group=Z)) +
   geom_histogram(alpha=0.5) + ggtitle("c=0") + xlab("True Propensity Score") + xlim(c(0,1))
 
 # REPEAT WITH C2
-dat2 <- gen_dat_Nethery(c=c2)
-newdat2 <- gen_dat_Nethery(c=c2)
+dat2 <- gen_dat_Nethery_witherror(c=c2)
+newdat2 <- gen_dat_Nethery_witherror(c=c2)
 p2 <- dat2 %>% ggplot(aes(ps.true, fill=Z, group=Z)) + 
   geom_histogram(alpha=0.5) + ggtitle("c=0.35") + xlab("True Propensity Score") + xlim(c(0,1))
 
 # repeat with C3
-dat3 <- gen_dat_Nethery(c=c3)
-newdat3 <- gen_dat_Nethery(c=c3)
+dat3 <- gen_dat_Nethery_witherror(c=c3)
+newdat3 <- gen_dat_Nethery_witherror(c=c3)
 p3 <- dat3 %>% ggplot(aes(ps.true, fill=Z, group=Z)) +
   geom_histogram(alpha=0.5) + ggtitle("c=0.7") + xlab("True Propensity Score") + xlim(c(0,1))
 
@@ -106,7 +106,7 @@ c0plot <- ggplot(NULL, aes(x = dat1$x2, color = as.factor(dat1$trt))) +
   xlab("x2") +
   ylab("Treatment Effect") +
   xlim(-2, 6) +
-  labs(title = "Treatment Effect Estimation (c = 0)", subtitle="Black: BCF Estimate/95% CI", col="z")
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
 c0plot
 
 # x11_tau_ests <- data.frame(Mean  = colMeans(bcf_3$tau[,which(dat1$x1 == 1)]),
@@ -178,9 +178,9 @@ c0plot
 
 sd2 <- sd(dat2[["Y"]])
 
-burn_in <- 4000
-sims <- 4000
-chains <- 3
+burn_in <- 1000
+sims <- 1000
+chains <- 2
 bcf_dat2 <- bcf(y                = dat2[["Y"]],
                 z                = dat2[["trt"]],
                 x_control        = as.matrix(data.frame(dat2)[,c("x1", "x2")]),
@@ -191,22 +191,22 @@ bcf_dat2 <- bcf(y                = dat2[["Y"]],
                 n_chains         = chains,
                 random_seed      = 1,
                 update_interval  = 1, 
-                no_output        = TRUE,
+                no_output        = F,
                 ntree_control = 200,
                 ntree_moderate = 100,
                 sigq = 0.75,
                 use_tauscale = F,
                 use_muscale = F,
-                sd_control = 3*sd2,
-                sd_moderate = 3*sd2,
+                sd_control = 4*sd2,
+                sd_moderate = 4*sd2,
                 power_moderate = 1,
                 base_moderate = 0.95,
                 power_control = 1,
                 base_control = 0.95,
-                include_pi = "control")
+                include_pi = "both")
 
 plot(1:(sims), bcf_dat2$tau[1:sims,2], type="l")
-plot(1:(sims), bcf_dat2$tau[1:sims,497], type="l")
+plot(1:(sims), bcf_dat2$tau[1:sims,453], type="l")
 #plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),2], type="l")
 
 #hist(bcf_3$tau[1:sims,1])
@@ -224,17 +224,17 @@ c035plot <- ggplot(NULL, aes(x = dat2$x2, color = as.factor(dat2$trt))) +
   xlab("x2") +
   ylab("Treatment Effect") +
   xlim(-2, 6) +
-  labs(title = "Treatment Effect Estimation (c = 0.35)", subtitle="Black: BCF Estimate/95% CI", col="z")
-
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0.35)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
+c035plot
 
 
 
 
 sd3 <- sd(dat3[["Y"]])
 
-burn_in <- 4000
-sims <- 4000
-chains <- 3
+burn_in <- 1000
+sims <- 1000
+chains <- 1
 bcf_dat3 <- bcf(y                = dat3[["Y"]],
                 z                = dat3[["trt"]],
                 x_control        = as.matrix(data.frame(dat3)[,c("x1", "x2")]),
@@ -245,23 +245,23 @@ bcf_dat3 <- bcf(y                = dat3[["Y"]],
                 n_chains         = chains,
                 random_seed      = 1,
                 update_interval  = 1, 
-                no_output        = TRUE,
+                no_output        = F,
                 ntree_control = 200,
                 ntree_moderate = 100,
-                sigq = 0.8,
+                sigq = 0.75,
                 use_tauscale = F,
                 use_muscale = F,
-                sd_control = 3*sd3,
-                sd_moderate = 3*sd3,
+                sd_control = 4*sd2,
+                sd_moderate = 4*sd2,
                 power_moderate = 1,
                 base_moderate = 0.95,
                 power_control = 1,
                 base_control = 0.95,
-                include_pi = "control")
+                include_pi = "both")
 
 plot(1:(sims), bcf_dat3$tau[1:sims,2], type="l")
 plot(1:(sims), bcf_dat3$tau[1:sims,380], type="l")
-plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),380], type="l")
+#plot((sims+1):(2*sims), bcf_3$tau[(sims+1):(2*sims),380], type="l")
 
 #hist(bcf_3$tau[1:sims,1])
 #hist(bcf_3$yhat[1:sims,1])
@@ -278,8 +278,8 @@ c07plot <- ggplot(NULL, aes(x = dat3$x2, color = as.factor(dat3$trt))) +
   xlab("x2") +
   ylab("Treatment Effect") +
   xlim(-2, 6) +
-  labs(title = "Treatment Effect Estimation (c = 0.7)", subtitle="Black: BCF Estimate/95% CI", col="z")
-
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0.7)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
+c07plot
 
 library(patchwork)
 patch <- c0plot / c035plot / c07plot
@@ -306,7 +306,7 @@ c0_pred_plot <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))
   xlab("x2") +
   ylab("Treatment Effect") +
   xlim(-2, 6) +
-  labs(title = "Treatment Effect Estimation, Test Set (c = 0)", subtitle="Black: BCF Estimate/95% CI", col="z")
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
 c0_pred_plot
 
 c0_patch <- c0plot / c0_pred_plot
@@ -314,7 +314,86 @@ c0_patch
 
 c0_mse_train <- sum((colMeans(bcf_3$tau) - dat1[["tau.true"]])^2)/N
 c0_mse_test <- sum((colMeans(pred_c0$tau) - newdat1[["tau.true"]])^2)/N
-mse <- data.frame(c = c(0), train = c(c0_mse_train), test = c(c0_mse_test))
+
+
+
+pred_c035 = predict(object=bcf_dat2,
+                  x_predict_control=as.matrix(data.frame(newdat1)[,c("x1", "x2")]),
+                  x_predict_moderate=as.matrix(data.frame(newdat1)[,c("x1", "x2")]),
+                  pi_pred=newdat1[["ps.true"]],
+                  z_pred=newdat1[["trt"]],
+                  n_cores = 1,
+                  save_tree_directory = '.')
+
+
+tau_ests_pred_c035 <- data.frame(Mean  = colMeans(pred_c035$tau),
+                               Low95 = apply(pred_c035$tau, 2, function(x) quantile(x, 0.025)),
+                               Up95  = apply(pred_c035$tau, 2, function(x) quantile(x, 0.975)))
+
+c035_pred_plot <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
+  geom_pointrange(aes(y = tau_ests_pred_c035$Mean, ymin = tau_ests_pred_c035$Low95, ymax = tau_ests_pred_c035$Up95), color = "black", alpha = 0.3) +
+  geom_point(aes(y = newdat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0.35)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
+c035_pred_plot
+
+
+c035_mse_train <- sum((colMeans(bcf_dat2$tau) - dat2[["tau.true"]])^2)/N
+c035_mse_test <- sum((colMeans(pred_c035$tau) - newdat1[["tau.true"]])^2)/N
+
+pred_c07 = predict(object=bcf_dat3,
+                    x_predict_control=as.matrix(data.frame(newdat1)[,c("x1", "x2")]),
+                    x_predict_moderate=as.matrix(data.frame(newdat1)[,c("x1", "x2")]),
+                    pi_pred=newdat1[["ps.true"]],
+                    z_pred=newdat1[["trt"]],
+                    n_cores = 1,
+                    save_tree_directory = '.')
+
+
+tau_ests_pred_c07 <- data.frame(Mean  = colMeans(pred_c07$tau),
+                                 Low95 = apply(pred_c07$tau, 2, function(x) quantile(x, 0.025)),
+                                 Up95  = apply(pred_c07$tau, 2, function(x) quantile(x, 0.975)))
+
+c07_pred_plot <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
+  geom_pointrange(aes(y = tau_ests_pred_c07$Mean, ymin = tau_ests_pred_c07$Low95, ymax = tau_ests_pred_c07$Up95), color = "black", alpha = 0.3) +
+  geom_point(aes(y = newdat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0.7)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
+c07_pred_plot
+
+
+c07_mse_train <- sum((colMeans(bcf_dat3$tau) - dat3[["tau.true"]])^2)/N
+c07_mse_test <- sum((colMeans(pred_c07$tau) - newdat1[["tau.true"]])^2)/N
+
+mse <- data.frame(c = c(0, 0.35, 0.7), train = c(c0_mse_train, c035_mse_train, c07_mse_train), test =  c(c0_mse_test, c035_mse_test, c07_mse_test))
+
+
+
+
+
+
+lm_c0 <- lm(Y ~ x1*x2*trt , data=dat1)
+dat1z1 <- mutate(dat1, trt=c(1))
+dat1z0 <- mutate(dat1, trt=c(0))
+lm_pred_tau_train <- predict(lm_c0, newdata = dat1z1) - predict(lm_c0, newdata = dat1z0)
+lm_mse_train_c0 <- mean((dat1$tau.true - lm_pred_tau_train)^2)
+
+c07_pred_plot_lm <- ggplot(NULL, aes(x = dat1$x2, color = as.factor(dat1$trt))) +
+  geom_point(aes(y = lm_pred_tau_train), color = "black", alpha = 0.3) +
+  geom_point(aes(y = dat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
+c07_pred_plot_lm
+
+
+
+
 
 
 burn_in <- 1000
@@ -354,7 +433,7 @@ ggplot(NULL, aes(x = dat1$x2, color = as.factor(dat1$trt))) +
   xlab("x2") +
   ylab("Treatment Effect") +
   xlim(-2, 6) +
-  labs(title = "Treatment Effect Estimation (c = 0)", subtitle="Black: BCF Estimate/95% CI", col="z")
+  labs(title = "Treatment Effect Estimation (c = 0)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
 
 
 
