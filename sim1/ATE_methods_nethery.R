@@ -23,6 +23,7 @@ cset=0
   #################################################################
   ##                        Generate data                        ##
   #################################################################
+  # set.seed(ell) # need this for reproducibility across methods.
   dat1 <- gen_dat_Nethery(c=cset)
   # (sample) true ATE, averaged over the 500 individual causal effects 
   ATE.true.k <- mean(dat1$tau.true)
