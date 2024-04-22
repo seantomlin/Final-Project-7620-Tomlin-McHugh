@@ -27,7 +27,7 @@ L=250
 # 
 # all_results <- bind_rows(raw.results.c000, raw.results.c035, raw.results.c070)
 
-load("all_results.Rdata")
+load("sim1/all_results.Rdata")
 
 table.1 <- all_results %>% group_by(c, method) %>%
   summarise(ATE=mean(ATE.k),
@@ -41,7 +41,10 @@ table.1 <- all_results %>% group_by(c, method) %>%
   )
 
 
-table.1
+library(kableExtra)
+
+
+table.1 %>% select(-ci.cover) %>%  kable(digits=4, format = "latex")
 
 
 results.plot <- table.1 %>% 
