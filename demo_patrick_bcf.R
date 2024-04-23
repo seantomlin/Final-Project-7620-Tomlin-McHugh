@@ -357,7 +357,7 @@ tau_ests_pred_c07 <- data.frame(Mean  = colMeans(pred_c07$tau),
                                  Up95  = apply(pred_c07$tau, 2, function(x) quantile(x, 0.975)))
 
 c07_pred_plot <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
-  geom_pointrange(aes(y = tau_ests_pred_c07$Mean, ymin = tau_ests_pred_c07$Low95, ymax = tau_ests_pred_c07$Up95), color = "black", alpha = 0.3) +
+  geom_point(aes(y = tau_ests_pred_c07$Mean), color = "black", alpha = 0.3) +
   geom_point(aes(y = newdat1$tau.true)) +
   xlab("x2") +
   ylab("Treatment Effect") +
@@ -391,6 +391,104 @@ c07_pred_plot_lm <- ggplot(NULL, aes(x = dat1$x2, color = as.factor(dat1$trt))) 
   labs(title = "Treatment Effect Estimation, Train Set (c = 0)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
 c07_pred_plot_lm
 
+newdat1z1 <- mutate(newdat1, trt=c(1))
+newdat1z0 <- mutate(newdat1, trt=c(0))
+lm_pred_tau_test <- predict(lm_c0, newdata = newdat1z1) - predict(lm_c0, newdata = newdat1z0)
+lm_mse_test_c0 <- mean((newdat1$tau.true - lm_pred_tau_test)^2)
+
+c07_pred_plot_lm_test <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
+  geom_point(aes(y = lm_pred_tau_test), color = "black", alpha = 0.3) +
+  geom_point(aes(y = newdat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
+c07_pred_plot_lm_test
+
+
+lm_c035 <- lm(Y ~ (x1+x2+trt)^3 , data=dat2)
+dat2z1 <- mutate(dat2, trt=c(1))
+dat2z0 <- mutate(dat2, trt=c(0))
+lm_pred_tau_train <- predict(lm_c035, newdata = dat2z1) - predict(lm_c035, newdata = dat2z0)
+lm_mse_train_c035 <- mean((dat2$tau.true - lm_pred_tau_train)^2)
+
+c035_pred_plot_lm <- ggplot(NULL, aes(x = dat2$x2, color = as.factor(dat2$trt))) +
+  geom_point(aes(y = lm_pred_tau_train), color = "black", alpha = 0.3) +
+  geom_point(aes(y = dat2$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0.35)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
+c035_pred_plot_lm
+
+lm_pred_tau_test <- predict(lm_c035, newdata = newdat1z1) - predict(lm_c035, newdata = newdat1z0)
+lm_mse_test_c035 <- mean((newdat1$tau.true - lm_pred_tau_test)^2)
+
+c035_pred_plot_lm_test <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
+  geom_point(aes(y = lm_pred_tau_test), color = "black", alpha = 0.3) +
+  geom_point(aes(y = newdat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0.35)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
+c035_pred_plot_lm_test
+
+lm_c07 <- lm(Y ~ (x1+x2+trt)^3 , data=dat3)
+dat3z1 <- mutate(dat3, trt=c(1))
+dat3z0 <- mutate(dat3, trt=c(0))
+lm_pred_tau_train <- predict(lm_c07, newdata = dat3z1) - predict(lm_c07, newdata = dat3z0)
+lm_mse_train_c07 <- mean((dat3$tau.true - lm_pred_tau_train)^2)
+
+c07_pred_plot_lm <- ggplot(NULL, aes(x = dat3$x2, color = as.factor(dat3$trt))) +
+  geom_point(aes(y = lm_pred_tau_train), color = "black", alpha = 0.3) +
+  geom_point(aes(y = dat3$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0.7)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
+c07_pred_plot_lm
+
+lm_pred_tau_test <- predict(lm_c07, newdata = newdat1z1) - predict(lm_c07, newdata = newdat1z0)
+lm_mse_test_c07 <- mean((newdat1$tau.true - lm_pred_tau_test)^2)
+
+c07_pred_plot_lm_test <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
+  geom_point(aes(y = lm_pred_tau_test), color = "black", alpha = 0.3) +
+  geom_point(aes(y = newdat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0.7)", subtitle="Black: Linear Estimate; Red/Blue: True Treatment Effect", col="z")
+c07_pred_plot_lm_test
+
+
+d <- dat3
+dz1 <- mutate(d, trt=c(1))
+dz0 <- mutate(d, trt=c(0))
+bart.mod <- bartc(data = d, response = Y, treatment = trt,
+                  confounders = x1 + x2, estimand = "ate",
+                  p.scoreAsCovariate = F, keepTrees=T)
+bart_pred_tau_train <- colMeans(predict(bart.mod, newdata = dz1)) - colMeans(predict(bart.mod, newdata = dz0))
+bart_mse_train <- mean((d$tau.true - bart_pred_tau_train)^2)
+pred_plot_bart_train <- ggplot(NULL, aes(x = d$x2, color = as.factor(d$trt))) +
+  geom_point(aes(y = bart_pred_tau_train), color = "black", alpha = 0.3) +
+  geom_point(aes(y = d$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Train Set (c = 0.7)", subtitle="Black: BART Estimate; Red/Blue: True Treatment Effect", col="z")
+pred_plot_bart_train
+
+bart_pred_tau_test <- colMeans(predict(bart.mod, newdata = newdat1z1)) - colMeans(predict(bart.mod, newdata = newdat1z0))
+bart_mse_test <- mean((newdat1$tau.true - bart_pred_tau_test)^2)
+
+pred_plot_bart_test <- ggplot(NULL, aes(x = newdat1$x2, color = as.factor(newdat1$trt))) +
+  geom_point(aes(y = bart_pred_tau_test), color = "black", alpha = 0.3) +
+  geom_point(aes(y = newdat1$tau.true)) +
+  xlab("x2") +
+  ylab("Treatment Effect") +
+  xlim(-2, 6) +
+  labs(title = "Treatment Effect Estimation, Test Set (c = 0.7)", subtitle="Black: BART Estimate; Red/Blue: True Treatment Effect", col="z")
+pred_plot_bart_test
 
 
 
