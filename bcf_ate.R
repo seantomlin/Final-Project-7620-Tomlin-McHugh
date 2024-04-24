@@ -63,18 +63,6 @@ for (i in 1:n_reps){
                  base_control = 0.95,
                  include_pi = "both")
     
-    # tau_ests <- data.frame(Mean  = colMeans(bcf_model$tau),
-    #                        Low95 = apply(bcf_model$tau, 2, function(x) quantile(x, 0.025)),
-    #                        Up95  = apply(bcf_model$tau, 2, function(x) quantile(x, 0.975)))
-    # 
-    # c0plot <- ggplot(NULL, aes(x = d$x2, color = as.factor(d$trt))) +
-    #   geom_pointrange(aes(y = tau_ests$Mean, ymin = tau_ests$Low95, ymax = tau_ests$Up95), color = "black", alpha = 0.3) +
-    #   geom_point(aes(y = d$tau.true)) +
-    #   xlab("x2") +
-    #   ylab("Treatment Effect") +
-    #   xlim(-2, 6) +
-    #   labs(title = "Treatment Effect Estimation, Train Set (c = 0)", subtitle="Black: BCF Estimate/95% CI; Red/Blue: True Treatment Effect", col="z")
-    # print(c0plot)
     
     ate_posterior <- rowMeans(bcf_model$tau)
     
@@ -109,5 +97,49 @@ cat("Time per rep", time_per_rep)
 
 write.csv(results, paste("C:/Users/pmchu/OneDrive - The Ohio State University/7620/project/bcf_results2.csv", sep=""),  row.names = F)
 
+results <- data.frame(results)
+results$bias <- results$estimated.ATE - results$true.ATE
+results$pct.bias <- (results$bias / abs(results$true.ATE))*100
+results$sqderr <- (results$estimated.ATE - results$true.ATE)^2
 
+ate_c0 <- mean(results[which(results[,"c"] == 0), "estimated.ATE"])
+ate_c035 <- mean(results[which(results[,"c"] == 0.35), "estimated.ATE"])
+ate_c07 <- mean(results[which(results[,"c"] == 0.7), "estimated.ATE"])
 
+# Coverage
+mean(results[which(results[,"c"] == 0), "covered"])
+mean(results[which(results[,"c"] == 0.35), "covered"])
+mean(results[which(results[,"c"] == 0.7), "covered"])
+
+# ATE
+mean(results[which(results[,"c"] == 0), "true.ATE"])
+mean(results[which(results[,"c"] == 0.35), "true.ATE"])
+mean(results[which(results[,"c"] == 0.7), "true.ATE"])
+
+# Bias
+mean(results[which(results[,"c"] == 0), "bias"])
+mean(results[which(results[,"c"] == 0.35), "bias"])
+mean(results[which(results[,"c"] == 0.7), "bias"])
+
+# Percent bias
+# mean(results[which(results[,"c"] == 0), "bias"]) / mean(results[which(results[,"c"] == 0), "true.ATE"])
+# mean(results[which(results[,"c"] == 0.35), "bias"]) / mean(results[which(results[,"c"] == 0.35), "true.ATE"])
+# mean(results[which(results[,"c"] == 0.7), "bias"]) / mean(results[which(results[,"c"] == 0.7), "true.ATE"])
+mean(results[which(results[,"c"] == 0), "pct.bias"])
+mean(results[which(results[,"c"] == 0.35), "pct.bias"])
+mean(results[which(results[,"c"] == 0.7), "pct.bias"])
+
+# SD-bar (std dev of posterior distribution of tau)
+mean(results[which(results[,"c"] == 0), "se.tau.hat."])
+mean(results[which(results[,"c"] == 0.35), "se.tau.hat."])
+mean(results[which(results[,"c"] == 0.7), "se.tau.hat."])
+
+# MSE 
+mean(results[which(results[,"c"] == 0), "sqderr"])
+mean(results[which(results[,"c"] == 0.35), "sqderr"])
+mean(results[which(results[,"c"] == 0.7), "sqderr"])
+
+# SE
+sqrt(sum((results[which(results[,"c"] == 0), "estimated.ATE"] - ate_c0)^2)/89)
+sqrt(sum((results[which(results[,"c"] == 0.35), "estimated.ATE"] - ate_c035)^2)/89)
+sqrt(sum((results[which(results[,"c"] == 0.7), "estimated.ATE"] - ate_c07)^2)/89)
