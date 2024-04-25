@@ -30,7 +30,7 @@ L=250
 load("sim1/all_results.Rdata")
 
 table.1 <- all_results %>% group_by(c, method) %>%
-  summarise(ATE=mean(ATE.k),
+  summarise(ATE=mean(Psi.k),
             Bias=mean(Psi.k-ATE.k),
             PercentBias=mean((Psi.k-ATE.k)/abs(ATE.k)*100),
             SD.bar = mean(SD.k),
